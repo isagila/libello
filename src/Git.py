@@ -26,4 +26,4 @@ class Git:
 
   @property
   def repo(self):
-    return f"{self._url[:-4]}/blob/{branch}/images"
+    return f"{self._url[:-4]}/blob/{self._branch}/images"
