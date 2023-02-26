@@ -19,14 +19,6 @@ class Database:
     )
     self._connection.commit()
 
-  def add_page(self, filename, page_id, body_id):
-    self._cursor.execute(
-      """INSERT INTO pages(filename, page_id, body_id)
-      VALUES (?, ?, ?)""",
-      (self._normalize(filename), page_id, body_id)
-    )
-    self._connection.commit()
-
   def get_page(self, filename):
     res = self._cursor.execute(
       "SELECT (page_id, body_id) FROM pages WHERE filename = ?",
@@ -45,13 +37,6 @@ class Database:
     )
     self._connection.commit()
   
-  def delete_page(self, filename):
-    self._cursor.execute(
-      "DELETE FROM pages WHERE filename = ?",
-      (self._normalize(filename), )
-    )
-    self._connection.commit()
-
   def close(self):
     self._connection.commit()
     self._connection.close()

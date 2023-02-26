@@ -40,19 +40,7 @@ class App:
     
     self._database.update_commit(self._git.get_commit())
 
-  def run(self, args):
-    if len(args) == 0:
-      log("No command provided")
-      return
-    command, options = args[0], args[1:]
-
-    match command:
-      case "run": self._watch(options)
-      case "new": self._create(options)
-      case "del": self._delete(options)
-      case _: log(f"Unknown command <{command}>")
-
-  def _watch(self, _):
+  def run(self):
     self._git.download()
 
     while True:
@@ -61,21 +49,6 @@ class App:
       except Exception as exc:
         log(exc)
       time.sleep(self._delay)
-    
-  def _create(self, options):
-    if len(args) != 3:
-      log("Must be two args: <filename> <title> <parent UUID>")
-      return
-    page_id, body_id = self._notion.add_page(options[1], options[2])
-    self._database.add_page(options[0], page_id, body_id)
-  
-  def _delete(self, options):
-    if len(args) == 0:
-      log("No filename provided")
-      return
-    page_id = self._database.get_page(options[0])["page_id"]
-    self._database.delete_page(options[0])
-    self._notion.delete(page_id)
 
   def _at_exit(self):
     self._database.close()

@@ -6,7 +6,7 @@ from Parser import (
   
 class Notion:
 
-  def __init__(self, api_key, root_uid, repo):
+  def __init__(self, api_key, repo):
     self._web = Web(
       prefix = f"https://api.notion.com/v1/",
       headers = {
