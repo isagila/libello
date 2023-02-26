@@ -3,6 +3,7 @@ from Parser import (
   Node,
   Parser
 )
+from Web import Web
   
 class Notion:
 
