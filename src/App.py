@@ -25,7 +25,7 @@ class App:
     for file in updates:
       if (
         not file.endswith(".txt") or
-        not file.startswith("src")
+        not file.startswith("src") or
         not self._database.find_page(file)
       ):
         log(f"Ignore file <{file}>")
