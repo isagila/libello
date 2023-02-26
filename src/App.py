@@ -3,6 +3,9 @@ from Git import Git
 from Notion import Notion
 from log import log
 
+import time
+import signal
+
 class App:
 
   def __init__(self, repo, notion, database):
@@ -23,14 +26,14 @@ class App:
       return
 
     for file in updates:
+      page = self._database.get_page(file)
       if (
         not file.endswith(".txt") or
         not file.startswith("src") or
-        not self._database.find_page(file)
+        not page
       ):
         log(f"Ignore file <{file}>")
         continue
-      page = self._database.get_page(file)
       new_body_id = self._notion.update_page(
         file,
         page["page_id"],

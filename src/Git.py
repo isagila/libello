@@ -1,5 +1,7 @@
 from Process import Process
 
+import os
+
 class Git:
 
   def __init__(self, url, branch, folder = "__source__"):
@@ -10,9 +12,10 @@ class Git:
   def download(self):
     Process.execute(f"rm -rf {self._folder}")
     Process.execute(f"git clone {self._url} {self._folder}")
+    os.chdir(self._folder)
   
   def get_updates(self, commit):
-    Process.execute("git pull", cwd = self._folder)
+    Process.execute("git pull")
     updates = Process.execute(
       f"git diff {commit} {self._branch} --name-status"
     ).split("\n")[:-1]

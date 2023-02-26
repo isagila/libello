@@ -21,10 +21,12 @@ class Database:
 
   def get_page(self, filename):
     res = self._cursor.execute(
-      "SELECT (page_id, body_id) FROM pages WHERE filename = ?",
+      "SELECT page_id, body_id FROM pages WHERE filename = ?",
       (self._normalize(filename), )
     ).fetchone()
 
+    if not res:
+      return None
     return {
       "page_id": res[0],
       "body_id": res[1],
@@ -43,5 +45,5 @@ class Database:
 
   @staticmethod
   def _normalize(path):
-    return os.normpath(path)
+    return os.path.normpath(path)
   

@@ -11,7 +11,7 @@ class Notion:
     self._web = Web(
       prefix = f"https://api.notion.com/v1/",
       headers = {
-        "Authorization": f"Bearer {api_key}",+
+        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "Notion-Version": "2022-06-28",
       }
@@ -60,7 +60,7 @@ class Notion:
           "type": "synced_block",
           "synced_block": {
             "synced_from": None,
-            "children": [ self._to_dict(parse_tree) ]
+            "children": self._to_dict(parse_tree)
           }
         }]
       }
@@ -116,7 +116,7 @@ class Notion:
     return {
       "type": "callout",
       "callout": {
-        "rich_text": children[0]["paragraph"]["text"],
+        "rich_text": children[0]["paragraph"]["rich_text"],
         "children": children[1:],
         **self._get_callout_style(node._options["type"])
       }
