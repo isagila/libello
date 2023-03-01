@@ -45,11 +45,8 @@ class Notion:
     self._web.patch(
       f"pages/{page_id}", {
         "icon": {
-          "type": "external",
-          "external": {
-            # TODO: add image support (not only embedded notion icons)
-            "url": f"https://www.notion.so/icons/{header['icon']}.svg" 
-          }
+          "type": "emoji",
+          "emoji": "⚪"
         },
         # TODO: deal with image path
         # "cover": {
