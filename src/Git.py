@@ -4,9 +4,9 @@ import os
 
 class Git:
 
-  def __init__(self, url, branch, folder = "__source__"):
+  def __init__(self, url, branch):
     self._url = f"https://github.com/{url}.git"
-    self._folder = folder
+    self._folder = "__source__"
     self._branch = branch
   
   def download(self):
@@ -27,6 +27,5 @@ class Git:
   def get_commit(self):
     return Process.execute("git log -1 --format=%H").strip()
 
-  @property
-  def repo(self):
+  def get_path(self):
     return f"{self._url[:-4]}/blob/{self._branch}"

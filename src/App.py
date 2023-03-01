@@ -1,47 +1,38 @@
-from Database import Database
 from Git import Git
 from Notion import Notion
 from log import log
 
+import os
+import sys
 import time
-import signal
 
 class App:
 
-  def __init__(self, repo, notion, database):
-    self._database = Database(**database)
+  def __init__(self, repo, notion):
     self._git = Git(**repo)
-    self._notion = Notion(
-      **notion,
-      repo = self._git.repo
-    )
-
+    self._notion = Notion(**notion, repo_path = self._git.get_path)
     self._delay = 10
+    self._commit_file = os.path.abspath("last_commit.txt")
 
-    signal.signal(signal.SIGTERM, self._at_exit)
+  def _is_source_file(self, file):
+    return file.endswith(".txt") and file.startswith("src")
 
   def _handle_updates(self):
-    updates = self._git.get_updates(self._database.get_commit())
+    updates = self._git.get_updates(self._get_commit())
     if not updates:
       return
+    log(f"Found {len(updates)} updates")
 
     for file in updates:
-      page = self._database.get_page(file)
-      if (
-        not file.endswith(".txt") or
-        not file.startswith("src") or
-        not page
-      ):
+      if not self._is_source_file(file):
         log(f"Ignore file <{file}>")
         continue
-      new_body_id = self._notion.update_page(
-        file,
-        page["page_id"],
-        page["body_id"]
-      )
-      self._database.update_page(file, new_body_id)
-    
-    self._database.update_commit(self._git.get_commit())
+      try:
+        self._notion.update_page(file)
+      except Exception as exc:
+        log(exc)
+      
+    self._update_commit(self._git.get_commit())
 
   def run(self):
     self._git.download()
@@ -53,5 +44,10 @@ class App:
         log(exc)
       time.sleep(self._delay)
 
-  def _at_exit(self):
-    self._database.close()
+  def _get_commit(self):
+    with open(self._commit_file, "r", encoding="utf8") as file:
+      return file.read().strip()
+
+  def _update_commit(self, new_commit):
+    with open(self._commit_file, "w", encoding="utf8") as file:
+      file.write(new_commit)

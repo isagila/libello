@@ -27,11 +27,14 @@ class Process:
 
   @staticmethod
   def execute(command, cwd=None):
-    return subprocess.check_output(
-      args = Process._make_sudo(command).split(),
-      cwd = cwd,
-      stderr = subprocess.STDOUT
-    ).decode("utf8")
+    try:
+      return subprocess.check_output(
+        args = Process._make_sudo(command).split(),
+        cwd = cwd,
+        stderr = subprocess.STDOUT
+      ).decode("utf8")
+    except:
+      return ""
   
   @staticmethod
   def _make_sudo(command):

@@ -157,6 +157,18 @@ class Parser:
       elif part != "":
         self._pointer.add_child("text", { "content": part })
 
+  def parse_header(self, filename):
+    lines = open(filename, "r", encoding="utf8").readlines()
+    if len(lines) < 4:
+      raise ParseException(f"Unable to parse header in file <{filename}>")
+
+    keys = ["page_id", "title", "icon", "cover"]
+    result = {}
+    for i, key in enumerate(keys):
+      result[key] = lines[i][len(key) + 2:].strip()
+
+    return result
+
   def parse_file(self, filename):
     self._tree = Node("page", {}, None)
     self._pointer = self._tree
@@ -165,6 +177,8 @@ class Parser:
 
     lines = open(filename, "r", encoding="utf8").readlines()
     for i, line in enumerate(lines):
+      if i < 4: # skip header
+        continue
       line = line.strip()
 
       if self._is_command(line):

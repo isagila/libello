@@ -7,7 +7,7 @@ from Web import Web
   
 class Notion:
 
-  def __init__(self, api_key, repo):
+  def __init__(self, api_key, repo_path):
     self._web = Web(
       prefix = f"https://api.notion.com/v1/",
       headers = {
@@ -17,44 +17,21 @@ class Notion:
       }
     )
     self._parser = Parser()
-    self._repo = repo
+    self._repo_path = repo_path
 
-  def add_page(self, title, parent_id):
-    response = self._web.post("pages", {
-      "parent": {
-        "type": "page_id",
-        "page_id": parent_id,
-      },
-      "properties": {
-        "title": {
-          "title": [
-            {
-              "type": "text",
-              "text": {
-                "content": title
-              }
-            }
-          ]
-        }
-      },
-      "children": [{
-        "type": "synced_block",
-        "synced_block": {
-          "synced_from": None,
-          "children": []
-        }
-      }]
-    })
-    return response["id"], self._extract_body_id(response["id"])
+  def update_page(self, filename, page_id):
+    header = self._parser.parse_header(filename)
+    page_id = header["page_id"]
+    body_id = self._extract_body_id(page_id)
 
-  def update_page(self, filename, page_id, body_id) :
-    self._web.delete(f"blocks/{body_id}")
+    if body_id:
+      self._web.delete(f"blocks/{body_id}")
     try:
       parse_tree = self._parser.parse_file(filename)
     except ParseException as exc:
       parse_tree = self._parser.make_exception(str(exc))
 
-    response = self._web.patch(
+    self._web.patch(
       f"blocks/{page_id}/children", {
         "children": [{
           "type": "synced_block",
@@ -65,13 +42,42 @@ class Notion:
         }]
       }
     )
-    return self._extract_body_id(page_id)
-  
-  def delete_page(self, page_id):
-    self._web.delete(f"blocks/{page_id}")
+    self._web.patch(
+      f"pages/{page_id}", {
+        "icon": {
+          "type": "external",
+          "external": {
+            # TODO: add image support (not only embedded notion icons)
+            "url": f"https://www.notion.so/icons/{header['icon']}.svg" 
+          }
+        },
+        # TODO: deal with image path
+        # "cover": {
+        #   "type": "external",
+        #   "external": {
+        #     "url": 
+        #   }
+        # },
+        "properties": {
+          "title": {
+            "title": [
+              {
+                "type": "text",
+                "text": {
+                  "content": header["title"]
+                }
+              }
+            ]
+          }
+        },
+      }
+    )
   
   def _extract_body_id(self, page_id):
-    return self._web.get(f"blocks/{page_id}/children")["results"][0]["id"]
+    children = self._web.get(f"blocks/{page_id}/children")["results"]
+    if len(children) > 0:
+      return children[0]["id"]
+    return None
 
 ################################################################################
 
@@ -199,4 +205,4 @@ class Notion:
       case "link":      return self._link_to_dict(node, children)
       case "katex":     return self._katex_to_dict(node, children)
       case "list_item": return self._list_item_to_dict(node, children)
-      case _:           return self._unknown_to_dict(node, children)
+    return self._unknown_to_dict(node, children)
