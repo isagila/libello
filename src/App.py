@@ -24,7 +24,7 @@ class App:
     log(f"Found {len(updates)} updates")
 
     for file in updates:
-      if not self._is_source_file(file):
+      if not self._is_source_file(file) or not os.path.exist(file):
         log(f"Ignore file <{file}>")
         continue
       try:
