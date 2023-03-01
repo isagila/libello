@@ -19,7 +19,7 @@ class Notion:
     self._parser = Parser()
     self._repo_path = repo_path
 
-  def update_page(self, filename, page_id):
+  def update_page(self, filename):
     header = self._parser.parse_header(filename)
     page_id = header["page_id"]
     body_id = self._extract_body_id(page_id)
